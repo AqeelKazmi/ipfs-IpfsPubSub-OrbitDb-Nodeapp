@@ -1,0 +1,22 @@
+{
+  "name": "ipfs_room",
+  "version": "1.0.0",
+  "description": "Repository to setup and create ipfs system to broadcast message ",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server -c-1 -p 12345 public",
+    "compile": "browserify src/app.js -o public/js/app.js -d"
+  },
+  "keywords": [
+    "ipfsExchange"
+  ],
+  "author": "Aqeel Kazmi",
+  "license": "MIT",
+  "dependencies": {
+    "browserify": "^16.2.3",
+    "http-server": "^0.11.1",
+    "ipfs": "^0.33.0",
+    "ipfs-pubsub-room": "^1.4.1",
+    "orbit-db": "^0.19.9"
+  }
+}

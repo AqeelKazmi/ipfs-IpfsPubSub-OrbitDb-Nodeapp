@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+
+ <body>
+       <label>Ipfs Id:</label>
+        <input type="text" id="receiverAdd" value="QmPgrrx43oZfXyGubqKhRJiHULwQgmWpnfPnXfeHA8EUzm">
+     <!--  <label>Peer Name:</label>
+       <input type="text" class="form-control" id="peerId" value="handle"> -->
+<br>
+<div>
+<label>Currency</label>
+<input type="text" class="form-control" id="currency" value="ether">
+<label>Price:</label>
+<input type="number" class="form-control" id="price" value="1">
+<label>Quantity:</label>
+<input type="number" class="form-control" id="quantity" value="12">
+</div>
+
+<br><br>
+<div>
+  <label>Currency:</label> <p id="p1">Hello World!</p>
+  <label>Quantity:</label>  <p id="p2">Hello World!</p>
+  <label>Price:</label><p id="p3">Hello World!</p>
+</div>
+
+
+       <p id="list"></p>
+
+            <script src="js/app.js"></script>
+            <script src="./orbitdb.min.js"></script>
+            <script src="./index.min.js"></script>
+
+          </body>
+<script>
+   try {
+      console.log("inside try");
+      //pass db string generated in console of express server
+      const dbAddress = ' /orbitdb/QmQasbR1ayUH2B11HdbqDS5zvePCmVpYN6SUDfeWzfhSU6/orderbook3';
+     // console.log(`Got DB Address : ${dbAddress}`);
+
+      // Create IPFS instance
+      ipfs = new Ipfs({
+        //repo: '/orbitdb/examples/browser/new/ipfs/0.27.3',
+        repo: 'ipfs-' + Math.random(),
+        start: true,
+        EXPERIMENTAL: {
+          pubsub: true,
+        },
+        config: {
+          Addresses: {
+            Swarm: [
+            '/dns4/ws-star.discovery.libp2p.io/tcp/443/wss/p2p-websocket-star',
+      ]
+          },
+        }
+      })
+
+      ipfs.on('error', (e) => handleError(e))
+
+      ipfs.on('ready', async () => {
+        // room = await Room(ipfs, 'new-room')
+        ipfs.id(async (err,info) =>{
+          if(err) { throw err}
+          console.log("IPFS  ready with address " + info.id);
+
+     //  const Room='ipfs-pubsub-room';
+      // //Creating ipfs Room
+ 
+   // console.log(`ipfs room creating... ${room}`);
+
+      // room.on('peer joined', (peer) => { 
+      // console.log('Peer joined the room', peer) })
+
+      // room.on('peer left', (peer) => {
+      // console.log('Peer left...', peer)     })
+
+        // Create the database.
+        //console.log(`Connecting to DB ${dbAddress} waiting...`);
+        orbitdb = new OrbitDB(ipfs);
+      
+        db = await orbitdb.open(dbAddress, {
+          // If database doesn't exist, create it
+          create: true,
+          overwrite: true,
+          // Load only the local version of the database,
+          // don't load the latest from the network yet
+          localOnly: false,
+          type: 'keyvalue',
+          write: ['*'],
+        });
+
+
+        db.events.on('ready', () => {
+          console.log(`Database is ready!`)
+        })
+
+        // Load the latest local copy of the DB.
+        await db.load();
+
+        // Signal that the DB is ready for use.
+        dbReady = true;
+     //  console.log("list of peers:"+db.get('peers'));
+     //  const myHandle =document.getElementById("peerId").value;
+
+        //Add newly created peer  into orbitdb
+        console.log("I am peer number:"+info.id);
+        var peer =[];
+        peer=db.get('peers');
+        peer.push(info.id);
+        console.log(info.id)
+        await db.put('peers', peer);
+        console.log("list of peers:"+db.get('peers'));
+
+
+
+//Create operation working
+ const currency =document.getElementById("currency").value;
+ const price =document.getElementById("price").value;
+ const quantity =document.getElementById("quantity").value;
+
+ const myOrder = {
+      currency: currency,
+      price: price,
+      quantity: quantity,
+      peer: info.id
+    }
+   // console.log("order:"+myOrder);
+    var ListedOrders = [];
+   // console.log("*********"+db.get(info.id));
+    ListedOrders = db.get("QmbAFFQvprAuELS7pfppjuPkRgHkXezNR57iZ6xQUQjp3w");
+    ListedOrders.push(myOrder);
+
+// Save the new order to the DB.
+await db.put("QmbAFFQvprAuELS7pfppjuPkRgHkXezNR57iZ6xQUQjp3w", ListedOrders);
+
+console.log(`Order added to DB!`)
+
+
+
+
+//Delete operation working
+// const idSelector = db.get("QmNpCH1AKFycg2Tw1LFwh5VoQqiuSxYSPyk1e3hszempQ7");
+// const rmOrder = idSelector.filter(id => id.currency !== "bitcoin" && id.peer !== "QmYbT3x7WA7cguuewGXvEsiSXAUcQju4AS8EA7c1ru24iY");
+// await db.put("QmNpCH1AKFycg2Tw1LFwh5VoQqiuSxYSPyk1e3hszempQ7",rmOrder )
+// console.log("entry deleted");
+
+
+
+
+// Update Operation working
+// const thisPeer = "QmNpCH1AKFycg2Tw1LFwh5VoQqiuSxYSPyk1e3hszempQ7";
+
+//       let orders = db.get(thisPeer)
+//       if(!orders) orders = [];
+
+//     //  console.log(`Order belonging to ${thisPeer}: ${JSON.stringify(orders)}`)
+
+//     const updateOdr= orders.map(order => {
+//       if(order.currency === "ether" ){
+//         order.currency = "bitcoin";
+//         order.quantity=000;
+//         order.price=000;
+//       }
+//       return order;
+//     });
+//     await db.put(thisPeer, updateOdr);
+    
+    
+     
+
+
+
+
+
+
+
+setInterval(() => {
+
+//Read operation working
+let peers = db.get('peers')
+  // Get orders for each peer.
+  for(var i = 0; i < peers.length; i++) {
+      const thisPeer = peers[i]
+
+      let orders = db.get(thisPeer)
+      if(!orders) orders = [];
+
+      console.log(`Order belonging to ${thisPeer}: ${JSON.stringify(orders)}`)
+
+      // Loop through each order.
+      for(var j=0; j < orders.length; j++) {
+        const thisOrder = orders[j];
+      
+        document.getElementById("p1").innerHTML = thisOrder.currency;
+        document.getElementById("p2").innerHTML =  thisOrder.quantity;
+        document.getElementById("p3").innerHTML = thisOrder.price;
+      }
+    }
+
+  }, 10000)
+
+
+ db.events.on('replicated', (address) => {
+          console.log(`DB just replicated with peer ${address}. Re-processing orders...`);
+        
+        })
+     })
+     })
+    } catch(err) {
+      console.error(`Error in loadIPFS: `, err);
+    }
+</script>
+
+          </html>
+
